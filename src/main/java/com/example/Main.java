@@ -1,6 +1,11 @@
 package com.example;
 
+import org.knowm.xchart.QuickChart;
+import org.knowm.xchart.SwingWrapper;
+import org.knowm.xchart.XYChart;
+
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -19,32 +24,49 @@ public class Main {
                     }
                 }).collect(Collectors.toList());*/
 
-        // List<Utility> allUtilities = mockInputVariables();
-        List<Utility> allUtilities = new ArrayList<>();
+            Set<Utility> allUtilities = mockInputVariables();
+//        Set<Utility> allUtilities = new HashSet<>();
+//
+//        allUtilities.add(new Utility(0.1, 1.0));
+//        allUtilities.add(new Utility(0.17, 1.0));
+//        allUtilities.add(new Utility(0.19, 0.81));
+//        allUtilities.add(new Utility(0.24, 0.81));
+//        allUtilities.add(new Utility(0.30, 0.81));
+//        allUtilities.add(new Utility(0.30, 0.82));
+//        allUtilities.add(new Utility(0.30, 0.82));
+//        allUtilities.add(new Utility(0.33, 0.63));
+//        allUtilities.add(new Utility(0.46, 0.63));
+//        allUtilities.add(new Utility(0.53, 0.63));
+//        allUtilities.add(new Utility(0.55, 0.44));
+//        allUtilities.add(new Utility(0.69, 0.44));
+//        allUtilities.add(new Utility(0.75, 0.44));
+//        allUtilities.add(new Utility(0.78, 0.25));
+//        allUtilities.add(new Utility(0.91, 0.33));
+//        allUtilities.add(new Utility(0.98, 0.33));
+//        allUtilities.add(new Utility(1.0, 0.14));
 
-        allUtilities.add(new Utility(0.1, 1.0));
-        allUtilities.add(new Utility(0.17, 1.0));
-        allUtilities.add(new Utility(0.19, 0.81));
-        allUtilities.add(new Utility(0.24, 0.81));
-        allUtilities.add(new Utility(0.30, 0.81));
-        allUtilities.add(new Utility(0.30, 0.82));
-        allUtilities.add(new Utility(0.30, 0.82));
-        allUtilities.add(new Utility(0.33, 0.63));
-        allUtilities.add(new Utility(0.46, 0.63));
-        allUtilities.add(new Utility(0.53, 0.63));
-        allUtilities.add(new Utility(0.55, 0.44));
-        allUtilities.add(new Utility(0.69, 0.44));
-        allUtilities.add(new Utility(0.75, 0.44));
-        allUtilities.add(new Utility(0.78, 0.25));
-        allUtilities.add(new Utility(0.91, 0.33));
-        allUtilities.add(new Utility(0.98, 0.33));
-        allUtilities.add(new Utility(1.0, 0.14));
+        List<Utility> paretoPoints = findParetoPoints(allUtilities).stream()
+                .sorted((utility1, utility2) -> {
+                    if (utility1.getBuyerUtility() > utility2.getBuyerUtility()) {
+                        return 1;
+                    } else if (utility1.getBuyerUtility() == utility2.getBuyerUtility()) {
+                        return Double.compare(utility1.getSellerUtility(), utility2.getSellerUtility());
+                    } else {
+                        return -1;
+                    }
+                }).collect(Collectors.toList());
 
-        Set<Utility> paretoPoints = findParetoPoints(allUtilities);
+        List<Double> sellerList = paretoPoints.stream().map(Utility::getSellerUtility).collect(Collectors.toList());
+        List<Double> buyerList = paretoPoints.stream().map(Utility::getBuyerUtility).collect(Collectors.toList());
 
+        // draw chart
+        XYChart chart = QuickChart.getChart("Pareto Chart", "Seller", "Buyer",
+                "pareto line", sellerList, buyerList);
+
+        new SwingWrapper(chart).displayChart();
     }
 
-    private static Set<Utility> findParetoPoints(List<Utility> allUtilities) {
+    private static Set<Utility> findParetoPoints(Set<Utility> allUtilities) {
         Set<Utility> paretoPoints = new HashSet<>();
 
         for (Utility currentUtility: allUtilities) {
@@ -78,12 +100,12 @@ public class Main {
     }
 
 
-    private static List<Utility> mockInputVariables() {
-        List<Utility> utilities = new ArrayList<>();
+    private static Set<Utility> mockInputVariables() {
+        Set<Utility> utilities = new HashSet<>();
 
-        for (int price = 100; price <= 900; price++) {
-            for (int warranty = 0; warranty <= 36; warranty++) {
-                for (int sendDuration = 1; sendDuration <= 21; sendDuration++) {
+        for (int price = 100; price <= 900; price+=300) {
+            for (int warranty = 0; warranty <= 36; warranty+=6) {
+                for (int sendDuration = 1; sendDuration <= 21; sendDuration+=4) {
                     for (int returnProduct = 0; returnProduct <= 1; returnProduct++) {
                         double sellerUtilityResult = calculateUtility(price, 100, 900, 100) * 0.5
                                 + (calculateUtility(36, warranty, 36, 0) * 0.2)
