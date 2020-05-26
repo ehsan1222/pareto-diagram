@@ -9,5 +9,5 @@ This program want to draw pareto chart of below example:
 | send duration     | [1, 21]    | 1   | 21  | 0.1           | 0.6          |
 | product return    | {yes, no}  |     |     | 0.2           | 0.2          |
 
-#### Result
+## Result
 ![](paretoCurve.png "Pareto Curve")
