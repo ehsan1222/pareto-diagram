@@ -12,23 +12,31 @@ import java.util.stream.Collectors;
  */
 public class Main {
 
+    public static final int SPLIT_VALUE = 100000000;
+
     public static void main(String[] args) {
         // Initial pareto points array
-        Utility[] paretoPoints = new Utility[100000001];
+        Utility[] paretoPointsInFixedSellerValue = new Utility[SPLIT_VALUE + 1];
 
         // Find pareto points of dataset
-        paretoValues(paretoPoints);
+        paretoValues(paretoPointsInFixedSellerValue);
+
+        Utility[] paretoPointsInFixedSellerValueNullRemoved = Arrays.stream(paretoPointsInFixedSellerValue).filter(Objects::nonNull).toArray(Utility[]::new);
+
+
+        Utility[] paretoPointsInFixedBuyerValue = removeNonParetoPointsInFixedBuyerValue(paretoPointsInFixedSellerValueNullRemoved);
+
 
         // Get x values of pareto utilities
         List<Double> x = Arrays
-                .stream(paretoPoints)
+                .stream(paretoPointsInFixedBuyerValue)
                 .filter(Objects::nonNull)
                 .map(Utility::getSellerUtility)
                 .collect(Collectors.toList());
 
         // Get y values og pareto utilities
         List<Double> y = Arrays
-                .stream(paretoPoints)
+                .stream(paretoPointsInFixedBuyerValue)
                 .filter(Objects::nonNull)
                 .map(Utility::getBuyerUtility)
                 .collect(Collectors.toList());
@@ -40,15 +48,30 @@ public class Main {
         new SwingWrapper(chart).displayChart();
     }
 
+    private static Utility[] removeNonParetoPointsInFixedBuyerValue(Utility[] paretoPointsInFixedSellerValue) {
+        Utility[] paretoPoints = new Utility[SPLIT_VALUE + 1];
+
+        for (Utility utility : paretoPointsInFixedSellerValue) {
+            int index = (int) (utility.getBuyerUtility() * SPLIT_VALUE);
+            if (paretoPoints[index] == null || paretoPoints[index].getSellerUtility() < utility.getSellerUtility() ||
+                    (paretoPoints[index].getSellerUtility() == utility.getSellerUtility() &&
+                            paretoPoints[index].getBuyerUtility() < utility.getBuyerUtility())) {
+                paretoPoints[index] = new Utility(utility.getSellerUtility(), utility.getBuyerUtility());
+            }
+        }
+
+        return paretoPoints;
+    }
+
     /**
      * Check New point is pareto and store in array or not.
      *
      * @param paretoPoints array of pareto points
-     * @param newUtility new point
+     * @param newUtility   new point
      */
     private static void checkIsPareto(Utility[] paretoPoints, Utility newUtility) {
 
-        int index = (int) (Math.floor(newUtility.getSellerUtility() * 100000000));
+        int index = (int) (Math.floor(newUtility.getSellerUtility() * SPLIT_VALUE));
         if (paretoPoints[index] == null || paretoPoints[index].getBuyerUtility() < newUtility.getBuyerUtility()) {
             paretoPoints[index] = new Utility(newUtility.getSellerUtility(), newUtility.getBuyerUtility());
         } else {
