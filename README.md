@@ -1,6 +1,6 @@
 # Pareto chart in Bilateral Negotiation game
 
-This program want to draw pareto chart of below example:
+This program wants to draw a Pareto chart of below table:
 
 | Decision variable |    scope   | min | max | seller weight | buyer weight |
 |:-----------------:|:----------:|:---:|:---:|:-------------:|:------------:|
@@ -9,5 +9,5 @@ This program want to draw pareto chart of below example:
 | send duration     | [1, 21]    | 1   | 21  | 0.1           | 0.6          |
 | product return    | {yes, no}  |     |     | 0.2           | 0.2          |
 
-## Result
+## Output chart
 ![](paretoCurve.png "Pareto Curve")
